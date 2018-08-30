@@ -1,6 +1,6 @@
 <# 
 Title: CopyToMany.ps1
-Author: Jordan Hubbard | Senior Infrastructure Engineer
+Author: Me | Senior Infrastructure Engineer
 Date: 08/23/2018
 Version: 1.0
 
