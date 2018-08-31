@@ -13,5 +13,12 @@ foreach ($name in $inputdata) {
     Get-EventLog -LogName "application" -EntryType "warning" -After (Get-Date).AddHours(-24) | ConvertTo-HTML | Out-File $File4
     Send-MailMessage -Attachments $File1,$File2,$File3,$File4 -SmtpServer "yourmail-server" -From "$HostName@yourdomain" -To "reciver@yourdomain" -Subject "$Hostname Daily Eventlog-Report"
 }
-#Modified to loop through csv with a list of servers to be run from a central task server - Me
+<#Modified to loop through csv with a list of servers to be run from a central task server
+The computers are put into a CSV file in the format:
+
+Name,
+somecomputername,
+someothercomputername,
+
 #Found on Spiceworks: https://community.spiceworks.com/topic/443133-need-a-script-to-capture-windows-event-log-in-last-24-hours?utm_source=copy_paste&utm_campaign=growth
+#>
