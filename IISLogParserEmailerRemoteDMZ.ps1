@@ -30,12 +30,16 @@ $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<server
 #Start PSSession with credentials above and run the commands in -ScriptBlock
 Invoke-Command -ComputerName <servername> -Credential $Cred -ScriptBlock {
 
+#Accounting for W3C being in GMT, check set time increment for the last half hour
+$time = (Get-Date -Format "HH:mm:ss"(Get-Date).addminutes(330))
+
 #Variables for sending email through O365 - use securePassword to create password file with key on the target server
 [Byte[]] $key = (24 digit array, seperated by commas)
 $smtpPass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString -Key $key
 $smtpCred = New-Object -TypeName System.Management.Automation.PSCredential ("email@email.com", $smtpPass)
 $ToAddress = 'email@email.com'
 $FromAddress = 'email@email.com'
+$BodyString = "Please see attached for current HTTP 500 Errors"
 $SmtpServer = 'smtp.office365.com'
 $SmtpPort = '587'
 
@@ -84,18 +88,30 @@ if ($Rows.Count -gt 0) {
       }
        $IISLog.Rows.Add($AddRow)
     }
-    #$IISLog | select @{n="Time"; e={Get-Date -Format "HH:mm:ss"("$($_.time)")}} | ? { $_.time -ge $time }
+    #Format Log data and increment over time so as to not repeat log alerts - Comment out if using the non-time-incremental method below
+    $IISLog | select @{n="DateTime"; e={Get-Date ("$($_.date) $($_.time)")}},date,time,sip,csmethod,csuristem,csuriquery,cip,csreferer,scstatus,scsubstatus,scwin32status,timetaken | ? { $_.DateTime -ge $time } |Out-File C:\Users\Administrator\Documents\THing\Stuff\$_results.csv
     
 
-    #Format Log data into string for sending
-    $BodyString = ""
-    foreach( $Row in $IISLog.Rows ){
-        $BodyString = $BodyString + $Row.date + " " + $Row.time + " " + $Row.sip + " " + $Row.csmethod + " " + $Row.csuristem + " " + $Row.csuriquery + " " + $Row.cip + " " + $Row.csreferer + " " + $Row.scstatus + " " + $Row.scsubstatus + " " + $Row.scwin32status + " " + $Row.timetaken + " " + "`n"
-    }
+    #Format Log data into string for sending - Uncomment if not wanting to increment over time
+    #$BodyString = ""
+    #foreach( $Row in $IISLog.Rows ){
+    #    $BodyString = $BodyString + $Row.date + " " + $Row.time + " " + $Row.sip + " " + $Row.csmethod + " " + $Row.csuristem + " " + $Row.csuriquery + " " + $Row.cip + " " + $Row.csreferer + " " + $Row.scstatus + " " + $Row.scsubstatus + " " + $Row.scwin32status + " " + $Row.timetaken + " " + "`n"
+    #}
+    
+    #Write CSV contents to a variable - Comment out if using the non-time-incremental method below
+    $importResults = @(Import-Csv 'C:\Users\Administrator\Documents\THing\Stuff\.csv')
+    
+    #Checks if CSV is empty or not, sends email if there are contents -Comment out 'if' statement and attachement variable if using the non-time-incremental method below, keep 
+    if ($importResults.Length -gt 0) {
 
-    #Send email with log entries found
-    Send-MailMessage -To $ToAddress -From $FromAddress -Subject 'IIS Log Alert' -Body $BodyString -SmtpServer $SmtpServer -Port $SmtpPort -Credential $smtpCred -UseSsl
+        $Attachment = 'C:\Users\Administrator\Documents\THing\Stuff\.csv'
+
+        #Send email with log entries found - Remove '-Attachments $Attachment' if using non-time-incremental method
+        Send-MailMessage -To $ToAddress -From $FromAddress -Subject 'IIS Log Alert' -Body $BodyString -Attachments $Attachment -SmtpServer $SmtpServer -Port $SmtpPort -Credential $smtpCred -UseSsl
+    } else {
+        exit
+        }
 } else {
     exit
-}
+    }
 }
