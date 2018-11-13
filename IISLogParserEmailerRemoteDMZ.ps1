@@ -34,7 +34,19 @@ $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<server
 #Start PSSession with credentials above and run the commands in -ScriptBlock
 Invoke-Command -ComputerName <#servername#> -Credential $Cred -ScriptBlock {
 
-#Accounting for W3C being in GMT, check set time increment for the last half hour
+#For list of timezones available on a computer, you can run:
+<#
+function get-timezone 
+{ 
+[cmdletbinding()] 
+param([string]$Name)
+([system.timezoneinfo]::GetSystemTimeZones() | where { $_.ID}) 
+}
+get-timezone
+#>
+
+#Accounting for W3C being in GMT, check set time increment for the last half hour, see above
+#for getting all available timezone ID's
 $timeCurrent = Get-Date -Format "HH:mm:ss"
 $localTimeZone = "Central Standard Time"
 $logTimeZone = "GMT Standard Time"
