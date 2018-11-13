@@ -35,7 +35,11 @@ $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<server
 Invoke-Command -ComputerName <#servername#> -Credential $Cred -ScriptBlock {
 
 #Accounting for W3C being in GMT, check set time increment for the last half hour
-$time = (Get-Date -Format "HH:mm:ss"(Get-Date).addminutes(330))
+$timeCurrent = Get-Date -Format "HH:mm:ss"
+$localTimeZone = "Central Standard Time"
+$logTimeZone = "GMT Standard Time"
+$halfHourOffset = (([System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($timeCurrent, $localTimeZone, $logTimeZone)).addminutes(-360))
+$time = $halfHourOffset.ToString("HH:mm:ss")
 
 #Variables for sending email through O365 - use securePassword to create password file with key on the target server
 [Byte[]] $key = (24 digit array, seperated by commas)
