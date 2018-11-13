@@ -12,14 +12,16 @@ Where email@email.com, replace with desired auth email, from and to email addres
 
 #Credentials for PSSession - use securePassword to create password file with key on the target server
 #Must have enabled PSRemoting for this on the target computer and host computer using the 'Enable-PSRemoting' commandlet
-$Pass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString
+[Byte[]] $key = (24 digit array, seperated by commas or set a range)
+$Pass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString -Key $key
 $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<servername>\Administrator", $Pass)
 
 #Start PSSession with credentials above and run the commands in -ScriptBlock
 Invoke-Command -ComputerName <servername> -Credential $Cred -ScriptBlock {
 
 #Variables for sending email through O365 - use securePassword to create password file with key on the target server
-$smtpPass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString
+[Byte[]] $key = (24 digit array, seperated by commas or set a range)
+$smtpPass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString -Key $key
 $smtpCred = New-Object -TypeName System.Management.Automation.PSCredential ("email@email.com", $smtpPass)
 $ToAddress = 'email@email.com'
 $FromAddress = 'email@email.com'
