@@ -23,12 +23,12 @@ Must enable WinRM and use these settings:
 #Credentials for PSSession - use securePassword to create password file with key on the target server
 #Must have enabled PSRemoting for this on the target computer and host computer using the 'Enable-PSRemoting' commandlet
 #Example key: [Byte[]] $key = (23,6,9,14,91,354,29,5,93,128,64,37,23,6,9,14,91,354,29,5,93,128,64,37)
-[Byte[]] $key = (24 digit array, seperated by commas)
+[Byte[]] $key = (<#24 digit array, seperated by commas#>)
 $Pass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString -Key $key
 $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<servername>\Administrator", $Pass)
 
 #Start PSSession with credentials above and run the commands in -ScriptBlock
-Invoke-Command -ComputerName <servername> -Credential $Cred -ScriptBlock {
+Invoke-Command -ComputerName <#servername#> -Credential $Cred -ScriptBlock {
 
 #Accounting for W3C being in GMT, check set time increment for the last half hour
 $time = (Get-Date -Format "HH:mm:ss"(Get-Date).addminutes(330))
