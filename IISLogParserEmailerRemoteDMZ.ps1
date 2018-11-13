@@ -4,7 +4,8 @@ Author: Me (and some internet people)
 Job: Senior Network Engineer
 Date: 11/08/2018
 Use in junction with SecurePassword.ps1 script for credentials
-Used to parse through IIS logs and find particular errors, compile them into an array and then send them via email to designated addresses
+Used to parse through IIS logs and find particular errors, 
+compile them into an array and then send them via email to designated addresses
 Can be reworked for most log files
 Where <servername> exists, replace with target server/computer name
 Where email@email.com, replace with desired auth email, from and to email addresses
@@ -20,9 +21,12 @@ Must enable WinRM and use these settings:
 **You can add -Concatenate to the end of Set-Item if you're trying to add a server to the list
 #>
 
-#Credentials for PSSession - use securePassword to create password file with key on the target server
-#Must have enabled PSRemoting for this on the target computer and host computer using the 'Enable-PSRemoting' commandlet
-#Example key: [Byte[]] $key = (23,6,9,14,91,354,29,5,93,128,64,37,23,6,9,14,91,354,29,5,93,128,64,37)
+<#
+Credentials for PSSession - use securePassword to create password file with key on the target server
+Must have enabled PSRemoting for this on the target computer and 
+host computer using the 'Enable-PSRemoting' commandlet
+Example key: [Byte[]] $key = (23,6,9,14,91,354,29,5,93,128,64,37,23,6,9,14,91,354,29,5,93,128,64,37)
+#>
 [Byte[]] $key = (<#24 digit array, seperated by commas#>)
 $Pass = Get-Content "C:\Users\Administrator\Documents\THing\Stuff\Pass.txt" | ConvertTo-SecureString -Key $key
 $Cred = New-Object -TypeName System.Management.Automation.PSCredential ("<servername>\Administrator", $Pass)
@@ -71,7 +75,8 @@ $IISLog = New-Object System.Data.DataTable "IISLog"
 #Checks if the array is empty or not
 if ($Rows.Count -gt 0) {
 
-    # Loop through each Column, create a new column through Data.DataColumn and add it to the DataTable
+    # Loop through each Column, create a new 
+    #column through Data.DataColumn and add it to the DataTable
     foreach ($Column in $Columns) {
       $NewColumn = New-Object System.Data.DataColumn $Column, ([string])
       $IISLog.Columns.Add($NewColumn)
@@ -88,26 +93,39 @@ if ($Rows.Count -gt 0) {
       }
        $IISLog.Rows.Add($AddRow)
     }
-    #Format Log data and increment over time so as to not repeat log alerts - Comment out if using the non-time-incremental method below
-    $IISLog | select @{n="DateTime"; e={Get-Date ("$($_.date) $($_.time)")}},date,time,sip,csmethod,csuristem,csuriquery,cip,csreferer,scstatus,scsubstatus,scwin32status,timetaken | ? { $_.DateTime -ge $time } |Out-File C:\Users\Administrator\Documents\THing\Stuff\$_results.csv
+    #Format Log data and increment over time so as to not repeat log alerts 
+    #- Comment out if using the non-time-incremental method below
+    $IISLog | select @{n="DateTime"; e={Get-Date ("$($_.date) $($_.time)")}},`
+            date,time,sip,csmethod,csuristem,csuriquery,`
+            cip,csreferer,scstatus,scsubstatus,scwin32status,timetaken |
+            ? { $_.DateTime -ge $time } |
+            Out-File C:\Users\Administrator\Documents\THing\Stuff\$_results.csv
     
 
     #Format Log data into string for sending - Uncomment if not wanting to increment over time
-    #$BodyString = ""
-    #foreach( $Row in $IISLog.Rows ){
-    #    $BodyString = $BodyString + $Row.date + " " + $Row.time + " " + $Row.sip + " " + $Row.csmethod + " " + $Row.csuristem + " " + $Row.csuriquery + " " + $Row.cip + " " + $Row.csreferer + " " + $Row.scstatus + " " + $Row.scsubstatus + " " + $Row.scwin32status + " " + $Row.timetaken + " " + "`n"
-    #}
+    <#
+    $BodyString = ""
+    foreach( $Row in $IISLog.Rows ){
+        $BodyString = $BodyString + $Row.date + " " + $Row.time + " " + `
+    $Row.sip + " " + $Row.csmethod + " " + $Row.csuristem + " " + $Row.csuriquery + `
+    " " + $Row.cip + " " + $Row.csreferer + " " + $Row.scstatus + " " + $Row.scsubstatus + `
+    " " + $Row.scwin32status + " " + $Row.timetaken + " " + "`n" + "`n"
+    }
+    #>
     
     #Write CSV contents to a variable - Comment out if using the non-time-incremental method below
     $importResults = @(Import-Csv 'C:\Users\Administrator\Documents\THing\Stuff\.csv')
     
-    #Checks if CSV is empty or not, sends email if there are contents -Comment out 'if' statement and attachement variable if using the non-time-incremental method below, keep 
+    #Checks if CSV is empty or not, sends email if there are contents 
+    #-Comment out 'if' statement and attachement variable if using the non-time-incremental method below, keep 
     if ($importResults.Length -gt 0) {
 
         $Attachment = 'C:\Users\Administrator\Documents\THing\Stuff\.csv'
 
         #Send email with log entries found - Remove '-Attachments $Attachment' if using non-time-incremental method
-        Send-MailMessage -To $ToAddress -From $FromAddress -Subject 'IIS Log Alert' -Body $BodyString -Attachments $Attachment -SmtpServer $SmtpServer -Port $SmtpPort -Credential $smtpCred -UseSsl
+        Send-MailMessage -To $ToAddress -From $FromAddress -Subject 'IIS Log Alert' `
+        -Body $BodyString -Attachments $Attachment -SmtpServer $SmtpServer `
+        -Port $SmtpPort -Credential $smtpCred -UseSsl
     } else {
         exit
         }
