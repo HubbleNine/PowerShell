@@ -8,6 +8,16 @@ Used to parse through IIS logs and find particular errors, compile them into an 
 Can be reworked for most log files
 Where <servername> exists, replace with target server/computer name
 Where email@email.com, replace with desired auth email, from and to email addresses
+Must enable WinRM and use these settings:
+*Run Enable-PSRemoting on the server machine
+**You can verify this by running winrm enumerate winrm/config/listener
+*It will enable the Windows Remote Management firewall rules
+*It will create and configure the LocalAccountTokenFilterPolicy registry key
+*It will reset the permissions on the four sessions hosts
+**You can verify this by running Get-PSSessionConfiguration
+*Start the WinRM service on the client machine
+*Run Set-Item WSMan:\localhost\Client\TrustedHosts -Value <hostname or FQDN or server>
+**You can add -Concatenate to the end of Set-Item if you're trying to add a server to the list
 #>
 
 #Credentials for PSSession - use securePassword to create password file with key on the target server
