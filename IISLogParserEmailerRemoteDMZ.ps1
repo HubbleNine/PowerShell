@@ -66,7 +66,7 @@ $Count = $Columns.Length
 # Get all Rows that I want to retrieve
 # Replace contents of query string with desired error codes
 # Good article for interpreting IIS logs: https://stackify.com/how-to-interpret-iis-logs/
-$QueryString = "*502 3 64*"
+$QueryString = "* 50* * * *"
 $Rows = $Log | where {$_ -like $QueryString}
 
 # Create an instance of a System.Data.DataTable
