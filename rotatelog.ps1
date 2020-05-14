@@ -1,9 +1,9 @@
 # Set up SMTP stuff
-$SMTPServer = "ex2010b.gilsbar.int"
-$MailFrom = "~IT Notification <it-notification@gilsbar.com>"
-$MailTo = "acelestin@gilsbar.com"
-$MailSubject= "EDDM Log Rotation Service on MLCSECURE3"
-$MailBodySuccess = "Log rotation is complete on MLCSECURE3.  Below is a listing of the file(s) added to the zip archive.<br><br>"
+$SMTPServer = "serverFQDN"
+$MailFrom = "from email"
+$MailTo = "to email"
+$MailSubject= "Subject"
+$MailBodySuccess = "Log rotation is complete on <server>.  Below is a listing of the file(s) added to the zip archive.<br><br>"
 #$MailBodyFailure = "Log rotation is complete, but there may be a problem with the zip file."
 
 
@@ -11,7 +11,7 @@ $MailBodySuccess = "Log rotation is complete on MLCSECURE3.  Below is a listing 
 $currentdate = get-date -Format yyyyMMdd
 
 # Move the log file to the working folder
-move-item "C:\Program Files\Matrix Logic\Secure\SecureEngineLog.txt" ("C:\scripts\hblog\$currentdate.txt")
+move-item "C:\logpath.txt" ("C:\scripts\hblog\$currentdate.txt")
 
 # First we add the .Net framework class needed for file compression.
 Add-Type -As System.IO.Compression.FileSystem
